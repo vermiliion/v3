@@ -792,6 +792,11 @@ function menu(){
     unzip menu.zip
     chmod +x menu/*
     mv menu/* /usr/local/sbin
+    sleep 2
+    sudo dos2unix /usr/local/sbin/menu-bot
+    sudo dos2unix /usr/local/sbin/menu-warp
+    sudo dos2unix /usr/local/sbin/menu-slowdns
+    sleep 2
     rm -rf menu
     rm -rf menu.zip
 }
