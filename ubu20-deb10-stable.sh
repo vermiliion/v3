@@ -23,9 +23,9 @@ clear && clear && clear
 clear;clear;clear
 
   # // Banner
-echo -e "${YELLOW}_____________________________________${NC}"
-echo -e "  EDIT BY : ${green}LITE  ${NC}${YELLOW}(${NC} ${green} TUNNELING-NETWORK${NC}${YELLOW})${NC}"
-echo -e "${YELLOW}_____________________________________${NC}"
+echo -e "${YELLOW}------------------------------------------------------------${NC}"
+echo -e "  EDIT BY : ${green}LITE VERMILLION${NC}"
+echo -e "${YELLOW}------------------------------------------------------------${NC}"
 echo ""
 sleep 2
 ###### IZIN SC 
@@ -92,9 +92,9 @@ function print_ok() {
     echo -e "${OK} ${BLUE} $1 ${FONT}"
 }
 function print_install() {
-	echo -e "${green} ☉━━━━━━━━━━━━━━━━━━━━━━━☉ ${FONT}"
-    echo -e "${YELLOW} # $1 ${FONT}"
-	echo -e "${green} ☉━━━━━━━━━━━━━━━━━━━━━━━☉ ${FONT}"
+	echo -e "${green}------------------------------------------------------------${FONT}"
+    echo -e "${YELLOW} $1 ${FONT}"
+	echo -e "${green}------------------------------------------------------------${FONT}"
     sleep 1
 }
 
@@ -104,9 +104,9 @@ function print_error() {
 
 function print_success() {
     if [[ 0 -eq $? ]]; then
-		echo -e "${green} ☉━━━━━━━━━━━━━━━━━━━━━━━☉ ${FONT}"
-        echo -e "${Green} # $1 berhasil dipasang"
-		echo -e "${green} ☉━━━━━━━━━━━━━━━━━━━━━━━☉ ${FONT}"
+		echo -e "${green}------------------------------------------------------------${FONT}"
+        echo -e "${Green} $1 berhasil dipasang"
+		echo -e "${green}------------------------------------------------------------${FONT}"
         sleep 2
     fi
 }
@@ -224,102 +224,129 @@ function base_package() {
     sudo apt-get install -y speedtest-cli vnstat libnss3-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison make libnss3-tools libevent-dev bc rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev sed dirmngr libxml-parser-perl build-essential gcc g++ python htop lsof tar wget curl ruby zip unzip p7zip-full python3-pip libc6 util-linux build-essential msmtp-mta ca-certificates bsd-mailx iptables iptables-persistent netfilter-persistent net-tools openssl ca-certificates gnupg gnupg2 ca-certificates lsb-release gcc shc make cmake git screen socat xz-utils apt-transport-https gnupg1 dnsutils cron bash-completion ntpdate chrony jq openvpn easy-rsa
     print_success "Packet Yang Dibutuhkan"
     
-}
-clear
-# Fungsi input domain
 function pasang_domain() {
-echo -e ""
+    clear
+
+    echo -e "\e[1;34m------------------------------------------------------------\e[0m"
+    echo -e "\e[1;36m         Selamat Datang di Pengaturan Domain              \e[0m"
+    echo -e "\e[1;34m------------------------------------------------------------\e[0m"
+
+    while true; do
+        echo -e "\e[1;32mPlease Select a Domain Type Below:\e[0m"
+        echo -e "\e[1;34m------------------------------------------------------------\e[0m"
+        echo -e "\e[1;32m1)\e[0m \e[1;37mMenggunakan Domain Sendiri\e[0m"
+        echo -e "\e[1;32m2)\e[0m \e[1;37mMenggunakan Domain Random\e[0m"
+        echo -e "\e[1;34m------------------------------------------------------------\e[0m"
+        read -p "   Please select numbers 1-2 or Any Button(Random): " host
+        echo ""
+
+        if [[ $host == "1" ]]; then
+            echo -e "   \e[1;32mPlease Enter Your Subdomain:\e[0m"
+            read -p "   Subdomain: " host1
+            
+            # Pastikan host1 tidak kosong
+            if [[ -z "$host1" ]]; then
+                echo -e "\e[1;31mSubdomain cannot be empty. Please try again.\e[0m"
+                echo ""
+                continue
+            fi
+            
+            echo "IP=" >> /var/lib/kyt/ipvps.conf
+            echo "$host1" > /etc/xray/domain
+            echo "$host1" > /root/domain
+            echo -e "\e[1;32mSubdomain '$host1' has been set successfully!\e[0m"
+            echo ""
+            break  # Keluar dari loop setelah sukses
+        elif [[ $host == "2" ]]; then
+            echo -e "\e[1;36mInstalling random domain...\e[0m"
+            # Install cf
+            wget ${REPO}files/cf && chmod +x cf && ./cf
+            rm -f /root/cf
+            echo -e "\e[1;32mRandom domain has been set successfully!\e[0m"
+            clear
+            break  # Keluar dari loop setelah sukses
+        else
+            echo -e "\e[1;31mInvalid selection. Please try again.\e[0m"
+            echo ""
+        fi
+    done
+    echo -e "\e[1;34m------------------------------------------------------------\e[0m"
+    echo -e "\e[1;36m                  Terima Kasih Telah Menggunakan           \e[0m"
+    echo -e "\e[1;36m                 Sistem Pengaturan Domain Kami              \e[0m"
+    echo -e "\e[1;34m------------------------------------------------------------\e[0m"
+}
+
 clear
-    echo -e "   .----------------------------------."
-echo -e "   |\e[1;32mPlease Select a Domain Type Below \e[0m|"
-echo -e "   '----------------------------------'"
-echo -e "     \e[1;32m1)\e[0m Menggunakan Domain Sendiri"
-echo -e "     \e[1;32m2)\e[0m Menggunakan Domain Random"
-echo -e "   ------------------------------------"
-read -p "   Please select numbers 1-2 or Any Button(Random) : " host
-echo ""
-if [[ $host == "1" ]]; then
-echo -e "   \e[1;32mPlease Enter Your Subdomain $NC"
-read -p "   Subdomain: " host1
-echo "IP=" >> /var/lib/kyt/ipvps.conf
-echo $host1 > /etc/xray/domain
-echo $host1 > /root/domain
-echo ""
-elif [[ $host == "2" ]]; then
-#install cf
-wget ${REPO}files/cf && chmod +x cf && ./cf
-rm -f /root/cf
-clear
-else
-print_install "Random Subdomain/Domain is Used"
-clear
+restart_system() {
+    # IZIN SCRIPT
+    MYIP=$(curl -sS ipv4.icanhazip.com)
+    echo -e "\e[32mLoading...\e[0m" 
+    clear
+    izinsc="https://raw.githubusercontent.com/vermiliion/izin/main/ip"
+
+    # USERNAME
+    rm -f /usr/bin/user
+    username=$(curl -s $izinsc | grep $MYIP | awk '{print $2}')
+    echo "$username" >/usr/bin/user
+
+    expx=$(curl -s $izinsc | grep $MYIP | awk '{print $3}')
+    echo "$expx" >/usr/bin/e
+
+    # DETAIL ORDER
+    username=$(cat /usr/bin/user)
+    oid=$(cat /usr/bin/ver)
+    exp=$(cat /usr/bin/e)
+    clear
+
+    # CERTIFICATE STATUS
+    today=$(date -d "0 days" +"%Y-%m-%d")
+    Exp1=$(curl -s $izinsc | grep $MYIP | awk '{print $4}')
+
+    # Status Expired Active
+    Info="(${green}Active${NC})"
+    Error="(${RED}Expired${NC})"
+
+    if [[ $today < $Exp1 ]]; then
+        sts="${Info}"
+    else
+        sts="${Error}"
     fi
-}
 
-clear
-#GANTI PASSWORD DEFAULT
-restart_system(){
-#IZIN SCRIPT
-MYIP=$(curl -sS ipv4.icanhazip.com)
-echo -e "\e[32mloading...\e[0m" 
-clear
-izinsc="https://raw.githubusercontent.com/vermiliion/izin/main/ip"
-# USERNAME
-rm -f /usr/bin/user
-username=$(curl $izinsc | grep $MYIP | awk '{print $2}')
-echo "$username" >/usr/bin/user
-expx=$(curl $izinsc | grep $MYIP | awk '{print $3}')
-echo "$expx" >/usr/bin/e
-# DETAIL ORDER
-username=$(cat /usr/bin/user)
-oid=$(cat /usr/bin/ver)
-exp=$(cat /usr/bin/e)
-clear
-# CERTIFICATE STATUS
-d1=$(date -d "$valid" +%s)
-d2=$(date -d "$today" +%s)
-certifacate=$(((d1 - d2) / 86400))
-# VPS Information
-DATE=$(date +'%Y-%m-%d')
-datediff() {
-    d1=$(date -d "$1" +%s)
-    d2=$(date -d "$2" +%s)
-    echo -e "$COLOR1 $NC Expiry In   : $(( (d1 - d2) / 86400 )) Days"
-}
-mai="datediff "$Exp" "$DATE""
+    # Mendapatkan informasi ISP dan Location
+    ISP=$(curl -s https://ipinfo.io/$MYIP/org)
+    location=$(curl -s https://ipinfo.io/$MYIP | jq -r .city), $(curl -s https://ipinfo.io/$MYIP | jq -r .region)
 
-# Status Expired Active
-Info="(${green}Active${NC})"
-Error="(${RED}ExpiRED${NC})"
-today=`date -d "0 days" +"%Y-%m-%d"`
-Exp1=$(curl $izinsc | grep $MYIP | awk '{print $4}')
-if [[ $today < $Exp1 ]]; then
-sts="${Info}"
-else
-sts="${Error}"
-fi
-TIMES="10"
-CHATID="5092269467"
-KEY="6918231835:AAFANlNjXrz-kxXmXskeY7TRUDMdM1lS6Bs"
-URL="https://api.telegram.org/bot$KEY/sendMessage"
-    TIMEZONE=$(printf '%(%H:%M:%S)T')
+    # Mendapatkan Timezone
+    timezone=$(curl -s http://worldtimeapi.org/api/ip/$MYIP | jq -r .timezone)
+
+    TIMES="10"
+    CHATID="5092269467"
+    KEY="6918231835:AAFANlNjXrz-kxXmXskeY7TRUDMdM1lS6Bs"
+    URL="https://api.telegram.org/bot$KEY/sendMessage"
+    
     TEXT="
-<code>────────────────────</code>
-<b>🍄 AUTOSCRIPT LITE 🍄</b>
-<code>────────────────────</code>
-<code>User     :</code><code>$username</code>
-<code>Domain   :</code><code>$domain</code>
-<code>IPVPS    :</code><code>$MYIP</code>
-<code>ISP      :</code><code>$ISP</code>
-<code>Exp Sc.  :</code><code>$exp</code>
-<code>────────────────────</code>
-   <b>🔑 LITE VERMILION 🔑</b>
-<code>────────────────────</code>
+TEXT="
+<code>══════════════════════</code>
+<b>🔸Notification AutoScript V3🔸</b>
+<code>══════════════════════</code>
+<code>👤 User     :</code> <code><b>$username</b></code>
+<code>🌐 Domain   :</code> <code><b>$domain</b></code>
+<code>💻 IP VPS   :</code> <code><b>$MYIP</b></code>
+<code>📡 ISP      :</code> <code><b>$ISP</b></code>
+<code>📍 Location  :</code> <code><b>$location</b></code>
+<code>🕒 Timezone  :</code> <code><b>$timezone</b></code>
+<code>🗓 Expiry   :</code> <code><b>$exp</b></code>
+<code>══════════════════════</code>
+<b>🔸Buy Premium VPN & SCRIPT🔸</b>
+<code>══════════════════════</code>
+Chats: @LITE_VERMILION
+<code>══════════════════════</code>"
 <i>Automatic Notifications From Github</i>
-"'&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://wa.me/6283867809137"}]]}' 
+" '&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://wa.me/6283867809137"}]]}' 
 
     curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
 }
+
 clear
 # Pasang SSL
 function pasang_ssl() {
@@ -783,6 +810,9 @@ function menu(){
     print_install "Memasang Menu Packet"
     wget ${REPO}menu/menu.zip
     unzip menu.zip
+    sudo dos2unix /usr/local/sbin/menu-bot
+    sudo dos2unix /usr/local/sbin/menu-warp
+    sudo dos2unix /usr/local/sbin/menu-slowdns
     chmod +x menu/*
     mv menu/* /usr/local/sbin
     rm -rf menu
