@@ -397,7 +397,7 @@ rm -rf /etc/vmess/.vmess.db
 #Instal Xray
 function install_xray() {
 clear
-    print_install "Core Xray 1.8.1 Latest Version"
+    print_install "Core Xray Latest Version"
     domainSock_dir="/run/xray";! [ -d $domainSock_dir ] && mkdir  $domainSock_dir
     chown www-data.www-data $domainSock_dir
     
@@ -411,7 +411,7 @@ bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release
     #chmod +x /usr/local/bin/xray
     domain=$(cat /etc/xray/domain)
     IPVS=$(cat /etc/xray/ipvps)
-    print_success "Core Xray 1.8.1 Latest Version"
+    print_success "Core Xray Latest Version"
     
     # Settings UP Nginix Server
     clear
@@ -570,9 +570,7 @@ clear
 print_install "Memasang SSHD"
 wget -q -O /etc/ssh/sshd_config "${REPO}files/sshd" >/dev/null 2>&1
 chmod 700 /etc/ssh/sshd_config
-/etc/init.d/ssh restart
 systemctl restart ssh
-/etc/init.d/ssh status
 print_success "SSHD"
 }
 
@@ -580,12 +578,11 @@ clear
 function ins_dropbear(){
 clear
 print_install "Menginstall Dropbear"
-# // Installing Dropbear
+# Installing Dropbear
 apt-get install dropbear -y > /dev/null 2>&1
 wget -q -O /etc/default/dropbear "${REPO}config/dropbear.conf"
 chmod +x /etc/default/dropbear
-/etc/init.d/dropbear restart
-/etc/init.d/dropbear status
+systemctl restart dropbear
 print_success "Dropbear"
 }
 
@@ -593,9 +590,8 @@ clear
 function ins_vnstat(){
 clear
 print_install "Menginstall Vnstat"
-# setting vnstat
+# Installing Vnstat
 apt -y install vnstat > /dev/null 2>&1
-/etc/init.d/vnstat restart
 apt -y install libsqlite3-dev > /dev/null 2>&1
 wget https://humdi.net/vnstat/vnstat-2.6.tar.gz
 tar zxvf vnstat-2.6.tar.gz
@@ -606,8 +602,7 @@ vnstat -u -i $NET
 sed -i 's/Interface "'""eth0""'"/Interface "'""$NET""'"/g' /etc/vnstat.conf
 chown vnstat:vnstat /var/lib/vnstat -R
 systemctl enable vnstat
-/etc/init.d/vnstat restart
-/etc/init.d/vnstat status
+systemctl restart vnstat
 rm -f /root/vnstat-2.6.tar.gz
 rm -rf /root/vnstat-2.6
 print_success "Vnstat"
@@ -616,20 +611,19 @@ print_success "Vnstat"
 function ins_openvpn(){
 clear
 print_install "Menginstall OpenVPN"
-#OpenVPN
-wget -q ${REPO}files/openvpn &&  chmod +x openvpn && ./openvpn
-/etc/init.d/openvpn restart
+# Installing OpenVPN
+wget -q ${REPO}files/openvpn && chmod +x openvpn && ./openvpn
+systemctl restart openvpn
 print_success "OpenVPN"
 }
 
 function ins_backup(){
 clear
 print_install "Memasang Backup Server"
-#BackupOption
+# Backup Option
 apt install rclone -y
 printf "q\n" | rclone config
-wget -O /root/.config/rclone/rclone.conf "${REPO}config/rclone.conf"
-#Install Wondershaper
+wget -O /root/.config/rclone/rclone.conf "https://raw.githubusercontent.com/vermiliion/v3/main/config/rclone.conf"
 cd /bin
 git clone  https://github.com/magnific0/wondershaper.git
 cd wondershaper
@@ -643,14 +637,13 @@ defaults
 tls on
 tls_starttls on
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
-
 account default
 host smtp.gmail.com
 port 587
 auth on
-user oceantestdigital@gmail.com
-from oceantestdigital@gmail.com
-password jokerman77 
+user backupsmtp93@gmail.com
+from backupsmtp93@gmail.com
+password sdallofkbpuhbtoa
 logfile ~/.msmtp.log
 EOF
 chown -R www-data:www-data /etc/msmtprc
@@ -662,50 +655,49 @@ clear
 function ins_swab(){
 clear
 print_install "Memasang Swap 1 G"
+# Install Gotop
 gotop_latest="$(curl -s https://api.github.com/repos/xxxserxxx/gotop/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
-    gotop_link="https://github.com/xxxserxxx/gotop/releases/download/v$gotop_latest/gotop_v"$gotop_latest"_linux_amd64.deb"
-    curl -sL "$gotop_link" -o /tmp/gotop.deb
-    dpkg -i /tmp/gotop.deb >/dev/null 2>&1
-    
-        # > Buat swap sebesar 1G
-    dd if=/dev/zero of=/swapfile bs=1024 count=1048576
-    mkswap /swapfile
-    chown root:root /swapfile
-    chmod 0600 /swapfile >/dev/null 2>&1
-    swapon /swapfile >/dev/null 2>&1
-    sed -i '$ i\/swapfile      swap swap   defaults    0 0' /etc/fstab
+gotop_link="https://github.com/xxxserxxx/gotop/releases/download/v$gotop_latest/gotop_v"$gotop_latest"_linux_amd64.deb"
+curl -sL "$gotop_link" -o /tmp/gotop.deb
+dpkg -i /tmp/gotop.deb >/dev/null 2>&1
 
-    # > Singkronisasi jam
-    chronyd -q 'server 0.id.pool.ntp.org iburst'
-    chronyc sourcestats -v
-    chronyc tracking -v
-    
-    wget -q ${REPO}files/bbr.sh &&  chmod +x bbr.sh && ./bbr.sh
+# Create swap of 1G
+dd if=/dev/zero of=/swapfile bs=1024 count=1048576
+mkswap /swapfile
+chown root:root /swapfile
+chmod 0600 /swapfile >/dev/null 2>&1
+swapon /swapfile >/dev/null 2>&1
+sed -i '$ i\/swapfile      swap swap   defaults    0 0' /etc/fstab
+
+# Sync time
+chronyd -q 'server 0.id.pool.ntp.org iburst'
+chronyc sourcestats -v
+chronyc tracking -v
+
+wget -q ${REPO}files/bbr.sh && chmod +x bbr.sh && ./bbr.sh
 print_success "Swap 1 G"
 }
 
 function ins_Fail2ban(){
 clear
 print_install "Menginstall Fail2ban"
-#apt -y install fail2ban > /dev/null 2>&1
-#sudo systemctl enable --now fail2ban
-#/etc/init.d/fail2ban restart
-#/etc/init.d/fail2ban status
+# Installing Fail2ban and DDOS Flate
+apt -y install fail2ban > /dev/null 2>&1
+systemctl enable --now fail2ban
+systemctl restart fail2ban
 
-# Instal DDOS Flate
 if [ -d '/usr/local/ddos' ]; then
-	echo; echo; echo "Please un-install the previous version first"
-	exit 0
+    echo "Please uninstall the previous version first"
+    exit 0
 else
-	mkdir /usr/local/ddos
+    mkdir /usr/local/ddos
 fi
 
-clear
-# banner
+# Update SSHD and Dropbear banners
 echo "Banner /etc/kyt.txt" >>/etc/ssh/sshd_config
 sed -i 's@DROPBEAR_BANNER=""@DROPBEAR_BANNER="/etc/kyt.txt"@g' /etc/default/dropbear
 
-# Ganti Banner
+# Set new banner
 wget -O /etc/kyt.txt "${REPO}files/issue.net"
 print_success "Fail2ban"
 }
@@ -713,38 +705,28 @@ print_success "Fail2ban"
 function ins_epro(){
 clear
 print_install "Menginstall ePro WebSocket Proxy"
-    wget -O /usr/bin/ws "${REPO}files/ws" >/dev/null 2>&1
-    wget -O /usr/bin/tun.conf "${REPO}config/tun.conf" >/dev/null 2>&1
-    wget -O /etc/systemd/system/ws.service "${REPO}files/ws.service" >/dev/null 2>&1
-    chmod +x /etc/systemd/system/ws.service
-    chmod +x /usr/bin/ws
-    chmod 644 /usr/bin/tun.conf
+wget -O /usr/bin/ws "${REPO}files/ws" >/dev/null 2>&1
+wget -O /usr/bin/tun.conf "${REPO}config/tun.conf" >/dev/null 2>&1
+wget -O /etc/systemd/system/ws.service "${REPO}files/ws.service" >/dev/null 2>&1
+chmod +x /etc/systemd/system/ws.service
+chmod +x /usr/bin/ws
+chmod 644 /usr/bin/tun.conf
+
 systemctl disable ws
 systemctl stop ws
 systemctl enable ws
 systemctl start ws
 systemctl restart ws
+
 wget -q -O /usr/local/share/xray/geosite.dat "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat" >/dev/null 2>&1
 wget -q -O /usr/local/share/xray/geoip.dat "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat" >/dev/null 2>&1
-wget -O /usr/sbin/ftvpn "${REPO}files/ftvpn" >/dev/null 2>&1
-chmod +x /usr/sbin/ftvpn
-iptables -A FORWARD -m string --string "get_peers" --algo bm -j DROP
-iptables -A FORWARD -m string --string "announce_peer" --algo bm -j DROP
-iptables -A FORWARD -m string --string "find_node" --algo bm -j DROP
-iptables -A FORWARD -m string --algo bm --string "BitTorrent" -j DROP
-iptables -A FORWARD -m string --algo bm --string "BitTorrent protocol" -j DROP
-iptables -A FORWARD -m string --algo bm --string "peer_id=" -j DROP
-iptables -A FORWARD -m string --algo bm --string ".torrent" -j DROP
-iptables -A FORWARD -m string --algo bm --string "announce.php?passkey=" -j DROP
-iptables -A FORWARD -m string --algo bm --string "torrent" -j DROP
-iptables -A FORWARD -m string --algo bm --string "announce" -j DROP
-iptables -A FORWARD -m string --algo bm --string "info_hash" -j DROP
+
 iptables-save > /etc/iptables.up.rules
 iptables-restore -t < /etc/iptables.up.rules
 netfilter-persistent save
 netfilter-persistent reload
 
-# remove unnecessary files
+# Clean up unnecessary files
 cd
 apt autoclean -y >/dev/null 2>&1
 apt autoremove -y >/dev/null 2>&1
@@ -753,27 +735,26 @@ print_success "ePro WebSocket Proxy"
 
 function ins_restart(){
 clear
-print_install "Restarting  All Packet"
-/etc/init.d/nginx restart
-/etc/init.d/openvpn restart
-/etc/init.d/ssh restart
-/etc/init.d/dropbear restart
-/etc/init.d/fail2ban restart
-/etc/init.d/vnstat restart
+print_install "Restarting All Services"
+systemctl restart nginx
+systemctl restart openvpn
+systemctl restart ssh
+systemctl restart dropbear
+systemctl restart fail2ban
+systemctl restart vnstat
 systemctl restart haproxy
-/etc/init.d/cron restart
-    systemctl daemon-reload
-    systemctl start netfilter-persistent
-    systemctl enable --now nginx
-    systemctl enable --now xray
-    systemctl enable --now rc-local
-    systemctl enable --now dropbear
-    systemctl enable --now openvpn
-    systemctl enable --now cron
-    systemctl enable --now haproxy
-    systemctl enable --now netfilter-persistent
-    systemctl enable --now ws
-    systemctl enable --now fail2ban
+systemctl restart cron
+systemctl daemon-reload
+systemctl enable --now nginx
+systemctl enable --now xray
+systemctl enable --now rc-local
+systemctl enable --now dropbear
+systemctl enable --now openvpn
+systemctl enable --now cron
+systemctl enable --now haproxy
+systemctl enable --now netfilter-persistent
+systemctl enable --now ws
+systemctl enable --now fail2ban
 history -c
 echo "unset HISTFILE" >> /etc/profile
 
@@ -781,13 +762,13 @@ cd
 rm -f /root/openvpn
 rm -f /root/key.pem
 rm -f /root/cert.pem
-print_success "All Packet"
+print_success "All Services Restarted"
 }
 
-#Instal Menu
+# Install Menu
 function menu(){
     clear
-    print_install "Memasang Menu Packet"
+    print_install "Installing Menu"
     wget -q ${REPO}menu/menu.zip
     unzip menu.zip
     chmod +x menu/*
@@ -801,7 +782,7 @@ function menu(){
     rm -rf menu.zip
 }
 
-# Membaut Default Menu 
+# Membuat Default Menu 
 function profile(){
 clear
     cat >/root/.profile <<EOF
@@ -820,11 +801,13 @@ cat >/etc/cron.d/xp_all <<-END
 		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 		2 0 * * * root /usr/local/sbin/xp
 	END
+
 	cat >/etc/cron.d/logclean <<-END
 		SHELL=/bin/sh
 		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 		*/20 * * * * root /usr/local/sbin/clearlog
 		END
+
     chmod 644 /root/.profile
 	
     cat >/etc/cron.d/daily_reboot <<-END
@@ -832,19 +815,22 @@ cat >/etc/cron.d/xp_all <<-END
 		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 		0 5 * * * root /sbin/reboot
 	END
+
     cat >/etc/cron.d/limit_ip <<-END
 		SHELL=/bin/sh
 		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 		*/2 * * * * root /usr/local/sbin/limit-ip
 	END
+
     cat >/etc/cron.d/limit_ip2 <<-END
 		SHELL=/bin/sh
 		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 		*/2 * * * * root /usr/bin/limit-ip
 	END
+
     echo "*/1 * * * * root echo -n > /var/log/nginx/access.log" >/etc/cron.d/log.nginx
     echo "*/1 * * * * root echo -n > /var/log/xray/access.log" >>/etc/cron.d/log.xray
-    service cron restart
+    systemctl restart cron
     cat >/home/daily_reboot <<-END
 		5
 	END
@@ -885,13 +871,13 @@ EOF
     else
         TIME_DATE="AM"
     fi
-print_success "Menu Packet"
+print_success "Menu Installed"
 }
 
-# Restart layanan after install
+# Restart services after install
 function enable_services(){
 clear
-print_install "Enable Service"
+print_install "Enabling Services"
     systemctl daemon-reload
     systemctl start netfilter-persistent
     systemctl enable --now rc-local
@@ -901,11 +887,11 @@ print_install "Enable Service"
     systemctl restart xray
     systemctl restart cron
     systemctl restart haproxy
-    print_success "Enable Service"
+    print_success "Services Enabled"
     clear
 }
 
-# Fingsi Install Script
+# Main Install Function
 function instal(){
 clear
     first_setup
@@ -942,10 +928,9 @@ rm -rf /root/*.sh
 rm -rf /root/LICENSE
 rm -rf /root/README.md
 rm -rf /root/domain
-#sudo hostnamectl set-hostname $user
 secs_to_human "$(($(date +%s) - ${start}))"
 sudo hostnamectl set-hostname $username
-echo -e "${green} Script Successfull Installed"
+echo -e "${green} Script Successfully Installed"
 echo ""
 read -p "$( echo -e "Press ${YELLOW}[ ${NC}${YELLOW}Enter${NC} ${YELLOW}]${NC} For reboot") "
 reboot
