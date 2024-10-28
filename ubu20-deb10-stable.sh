@@ -321,8 +321,8 @@ restart_system() {
 
     TIMES="10"
     CHATID="5092269467"
-    KEY="6918231835:AAFANlNjXrz-kxXmXskeY7TRUDMdM1lS6Bs"
-    URL="https://api.telegram.org/bot$KEY/sendMessage"    
+    KEY="6918231835:AAFANlNjXrz-kxXmXskeY7TRUDMdM1lS6Bs"  # Replace with your actual Telegram bot API key
+    URL="https://api.telegram.org/bot$KEY/sendMessage" 
     TEXT="
 <code>══════════════════════</code>
 <b>🔸Notification AutoScript V3🔸</b>
@@ -339,12 +339,12 @@ restart_system() {
 <code>══════════════════════</code>
 Chats: @LITE_VERMILION
 <code>══════════════════════</code>
-"
 <i>Automatic Notifications From Github</i>
-" '&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://wa.me/6283867809137"}]]}' 
+"
 
     curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
 }
+
 
 clear
 # Pasang SSL
