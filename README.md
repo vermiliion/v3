@@ -1,8 +1,8 @@
-# Repo Deb10 & Ubt20
+
 ```
 wget -q https://raw.githubusercontent.com/vermiliion/v3/main/gue.sh && chmod +x gue.sh && ./gue.sh
 ```
-# Repo Deb11 & Ubt22
+
 ```
 wget -q https://raw.githubusercontent.com/vermiliion/v3/main/crot.sh && chmod +x crot.sh && ./crot.sh
 ```
