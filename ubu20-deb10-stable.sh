@@ -322,10 +322,8 @@ restart_system() {
     TIMES="10"
     CHATID="5092269467"
     KEY="6918231835:AAFANlNjXrz-kxXmXskeY7TRUDMdM1lS6Bs"
-    URL="https://api.telegram.org/bot$KEY/sendMessage"
-    
+    URL="https://api.telegram.org/bot$KEY/sendMessage"    
     TEXT="
-TEXT="
 <code>══════════════════════</code>
 <b>🔸Notification AutoScript V3🔸</b>
 <code>══════════════════════</code>
@@ -340,7 +338,8 @@ TEXT="
 <b>🔸Buy Premium VPN & SCRIPT🔸</b>
 <code>══════════════════════</code>
 Chats: @LITE_VERMILION
-<code>══════════════════════</code>"
+<code>══════════════════════</code>
+"
 <i>Automatic Notifications From Github</i>
 " '&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://wa.me/6283867809137"}]]}' 
 
