@@ -32,6 +32,7 @@ fun_bar() {
 res1() {
     wget https://raw.githubusercontent.com/vermiliion/v3/main/menu/menu.zip
     unzip menu.zip
+    sed -i 's/\r$//' /usr/local/sbin/*
     chmod +x menu/*
     mv menu/* /usr/local/sbin
     rm -rf menu

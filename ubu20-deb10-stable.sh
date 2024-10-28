@@ -23,9 +23,9 @@ clear && clear && clear
 clear;clear;clear
 
   # // Banner
-echo -e "${YELLOW}_____________________________________${NC}"
-echo -e "  EDIT BY : ${green}LITE  ${NC}${YELLOW}(${NC} ${green} TUNNELING-NETWORK${NC}${YELLOW})${NC}"
-echo -e "${YELLOW}_____________________________________${NC}"
+echo -e "${YELLOW}------------------------------------------------------------${NC}"
+echo -e "EDIT BY : ${green}Lite  ${NC}${YELLOW}(${NC} ${green} Vermillion${NC}${YELLOW})${NC}"
+echo -e "${YELLOW}------------------------------------------------------------${NC}"
 echo ""
 sleep 2
 ###### IZIN SC 
@@ -92,9 +92,9 @@ function print_ok() {
     echo -e "${OK} ${BLUE} $1 ${FONT}"
 }
 function print_install() {
-	echo -e "${green} ☉━━━━━━━━━━━━━━━━━━━━━━━☉ ${FONT}"
-    echo -e "${YELLOW} # $1 ${FONT}"
-	echo -e "${green} ☉━━━━━━━━━━━━━━━━━━━━━━━☉ ${FONT}"
+	echo -e "${green}------------------------------------------------------------${FONT}"
+    echo -e "${YELLOW} $1 ${FONT}"
+	echo -e "${green}------------------------------------------------------------${FONT}"
     sleep 1
 }
 
@@ -104,9 +104,9 @@ function print_error() {
 
 function print_success() {
     if [[ 0 -eq $? ]]; then
-		echo -e "${green} ☉━━━━━━━━━━━━━━━━━━━━━━━☉ ${FONT}"
-        echo -e "${Green} # $1 berhasil dipasang"
-		echo -e "${green} ☉━━━━━━━━━━━━━━━━━━━━━━━☉ ${FONT}"
+		echo -e "${green}------------------------------------------------------------${FONT}"
+        echo -e "${Green} $1 berhasil dipasang"
+		echo -e "${green}------------------------------------------------------------${FONT}"
         sleep 2
     fi
 }
@@ -224,36 +224,48 @@ function base_package() {
     sudo apt-get install -y speedtest-cli vnstat libnss3-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison make libnss3-tools libevent-dev bc rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev sed dirmngr libxml-parser-perl build-essential gcc g++ python htop lsof tar wget curl ruby zip unzip p7zip-full python3-pip libc6 util-linux build-essential msmtp-mta ca-certificates bsd-mailx iptables iptables-persistent netfilter-persistent net-tools openssl ca-certificates gnupg gnupg2 ca-certificates lsb-release gcc shc make cmake git screen socat xz-utils apt-transport-https gnupg1 dnsutils cron bash-completion ntpdate chrony jq openvpn easy-rsa
     print_success "Packet Yang Dibutuhkan"
     
-}
-clear
-# Fungsi input domain
 function pasang_domain() {
-echo -e ""
-clear
-    echo -e "   .----------------------------------."
-echo -e "   |\e[1;32mPlease Select a Domain Type Below \e[0m|"
-echo -e "   '----------------------------------'"
-echo -e "     \e[1;32m1)\e[0m Menggunakan Domain Sendiri"
-echo -e "     \e[1;32m2)\e[0m Menggunakan Domain Random"
-echo -e "   ------------------------------------"
-read -p "   Please select numbers 1-2 or Any Button(Random) : " host
-echo ""
-if [[ $host == "1" ]]; then
-echo -e "   \e[1;32mPlease Enter Your Subdomain $NC"
-read -p "   Subdomain: " host1
-echo "IP=" >> /var/lib/kyt/ipvps.conf
-echo $host1 > /etc/xray/domain
-echo $host1 > /root/domain
-echo ""
-elif [[ $host == "2" ]]; then
-#install cf
-wget ${REPO}files/cf.sh && chmod +x cf.sh && ./cf.sh
-rm -f /root/cf.sh
-clear
-else
-print_install "Random Subdomain/Domain is Used"
-clear
-    fi
+    local valid=false  # Variabel untuk memastikan pengguna memilih dengan benar
+    while [ $valid == false ]; do
+        echo -e ""
+        clear
+        echo -e "------------------------------------------------------------"
+        echo -e "\e[1;32mSilahkan Pilih Opsi Untuk Setup Domain Di Bawah:\e[0m"
+        echo -e "------------------------------------------------------------"
+        echo -e "\e[1;32m1)\e[0m Menggunakan Domain Sendiri"
+        echo -e "\e[1;32m2)\e[0m Menggunakan Domain Random"
+        echo -e "------------------------------------------------------------"
+        read -p "   Please select numbers 1-2 : " host
+        echo ""
+
+        if [[ $host == "1" ]]; then
+            echo -e "   \e[1;32mPlease Enter Your Subdomain $NC"
+            read -p "   Subdomain: " host1
+            echo "IP=" >> /var/lib/kyt/ipvps.conf
+            echo $host1 > /etc/xray/domain
+            echo $host1 > /root/domain
+            valid=true  # Set valid to true untuk keluar dari loop
+            echo -e "Domain berhasil disimpan ke konfigurasi!"
+            echo ""
+        elif [[ $host == "2" ]]; then
+            # Install Cloudflare script dan jalankan
+            wget ${REPO}files/cf && chmod +x cf && ./cf
+            # Simpan domain random yang dihasilkan oleh skrip cf
+            host2=$(cat /etc/xray/domain)  # Contoh: domain random disimpan di file ini oleh skrip cf
+            echo "IP=" >> /var/lib/kyt/ipvps.conf
+            echo $host2 > /etc/xray/domain
+            echo $host2 > /root/domain
+            valid=true  # Set valid to true untuk keluar dari loop
+            rm -f /root/cf
+            clear
+            echo -e "Domain random berhasil disimpan ke konfigurasi!"
+        else
+            # Tampilkan pesan error dan minta pengguna untuk memilih lagi
+            echo -e "\e[31mOpsi yang Anda pilih tidak valid. Silakan pilih 1 atau 2.\e[0m"
+            sleep 2  # Tunggu sebentar sebelum mengulang loop
+            clear
+        fi
+    done
 }
 
 clear
@@ -271,6 +283,9 @@ echo "$username" >/usr/bin/user
 expx=$(curl $izinsc | grep $MYIP | awk '{print $3}')
 echo "$expx" >/usr/bin/e
 # DETAIL ORDER
+ISP=$(curl -s ipinfo.io/org | cut -d " " -f 2-10)
+CITY=$(curl -s ipinfo.io/city)
+TIMEZONE=$(printf '%(%H:%M:%S)T')
 username=$(cat /usr/bin/user)
 oid=$(cat /usr/bin/ver)
 exp=$(cat /usr/bin/e)
@@ -304,18 +319,21 @@ KEY="6918231835:AAFANlNjXrz-kxXmXskeY7TRUDMdM1lS6Bs"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
     TIMEZONE=$(printf '%(%H:%M:%S)T')
     TEXT="
-<code>────────────────────</code>
-<b>🍄 AUTOSCRIPT LITE 🍄</b>
-<code>────────────────────</code>
-<code>User     :</code><code>$username</code>
-<code>Domain   :</code><code>$domain</code>
-<code>IPVPS    :</code><code>$MYIP</code>
-<code>ISP      :</code><code>$ISP</code>
-<code>Exp Sc.  :</code><code>$exp</code>
-<code>────────────────────</code>
-   <b>🔑 LITE VERMILION 🔑</b>
-<code>────────────────────</code>
-<i>Automatic Notifications From Github</i>
+<code>─────────────────────</code>
+𝗡𝗼𝘁𝗶𝗳𝗶𝗰𝗮𝘁𝗶𝗼𝗻 𝗜𝗻𝘀𝘁𝗮𝗹𝗹𝗲𝗿 𝗦𝗰𝗿𝗶𝗽𝘁 𝗩𝟯
+<code>─────────────────────</code>
+<code><b>User :</code><code>$username</code>
+<code><b>Domain :</code><code>$domain</code>
+<code><b>IP Vps :</code><code>$MYIP</code>
+<code><b>ISP :</code><code>$ISP</code>
+<code><b>Location :</code><code>$CITY</code>
+<code><b>Exp Sc :</code><code>$exp</code>
+<code><b>Timezone :</code><code>$ISP</code>
+<code>─────────────────────</code>
+𝗖𝗵𝗮𝘁𝘀 : @Lite_Vermilion
+𝗧𝗼 𝗕𝘂𝘆 𝗦𝗰𝗿𝗶𝗽𝘁 𝗽𝗿𝗲𝗺𝗶𝘂𝗺
+<code>─────────────────────</code>
+<i><b>Automatic Notifications From Github</i>
 "'&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://wa.me/6283867809137"}]]}' 
 
     curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
@@ -390,7 +408,7 @@ rm -rf /etc/vmess/.vmess.db
 #Instal Xray
 function install_xray() {
 clear
-    print_install "Core Xray 1.8.1 Latest Version"
+    print_install "Core Xray Latest Version"
     domainSock_dir="/run/xray";! [ -d $domainSock_dir ] && mkdir  $domainSock_dir
     chown www-data.www-data $domainSock_dir
     
@@ -404,12 +422,12 @@ bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release
     #chmod +x /usr/local/bin/xray
     domain=$(cat /etc/xray/domain)
     IPVS=$(cat /etc/xray/ipvps)
-    print_success "Core Xray 1.8.1 Latest Version"
+    print_success "Core Xray Latest Version"
     
     # Settings UP Nginix Server
     clear
-    curl -s ipinfo.io/city >>/etc/xray/city
-    curl -s ipinfo.io/org | cut -d " " -f 2-10 >>/etc/xray/isp
+    curl -s ipinfo.io/city
+    curl -s ipinfo.io/org | cut -d " " -f 2-10
     print_install "Memasang Konfigurasi Packet"
     wget -O /etc/haproxy/haproxy.cfg "${REPO}config/haproxy.cfg" >/dev/null 2>&1
     wget -O /etc/nginx/conf.d/xray.conf "${REPO}config/xray.conf" >/dev/null 2>&1
@@ -783,6 +801,7 @@ function menu(){
     print_install "Memasang Menu Packet"
     wget ${REPO}menu/menu.zip
     unzip menu.zip
+    sed -i 's/\r$//' /usr/local/sbin/*
     chmod +x menu/*
     mv menu/* /usr/local/sbin
     rm -rf menu
@@ -927,8 +946,6 @@ history -c
 rm -rf /root/menu
 rm -rf /root/*.zip
 rm -rf /root/*.sh
-rm -rf /root/LICENSE
-rm -rf /root/README.md
 rm -rf /root/domain
 #sudo hostnamectl set-hostname $user
 secs_to_human "$(($(date +%s) - ${start}))"
