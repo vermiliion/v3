@@ -787,8 +787,15 @@ function menu(){
     wget ${REPO}menu/menu.zip
     unzip menu.zip
     chmod +x menu/*
-    mv menu/* /usr/local/sbin
-    rm -rf menu
+    mv menu/* /usr/bin
+    sed -i 's/\r$//' /menu-bot
+    sed -i 's/\r$//' /menu-warp
+    sed -i 's/\r$//' /menu-slowdns
+    sed -i 's/\r$//' /autobackup
+    chmod +x menu-bot
+    chmod +x menu-warp
+    chmod +x menu-slowdns
+    chmod +x autobackup
     rm -rf menu.zip
 }
 
@@ -924,6 +931,7 @@ clear
     enable_services
     restart_system
 }
+clear
 instal
 echo ""
 history -c
