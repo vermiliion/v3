@@ -224,64 +224,46 @@ function base_package() {
     sudo apt-get install -y speedtest-cli vnstat libnss3-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison make libnss3-tools libevent-dev bc rsyslog dos2unix zlib1g-dev libssl-dev libsqlite3-dev sed dirmngr libxml-parser-perl build-essential gcc g++ python htop lsof tar wget curl ruby zip unzip p7zip-full python3-pip libc6 util-linux build-essential msmtp-mta ca-certificates bsd-mailx iptables iptables-persistent netfilter-persistent net-tools openssl ca-certificates gnupg gnupg2 ca-certificates lsb-release gcc shc make cmake git screen socat xz-utils apt-transport-https gnupg1 dnsutils cron bash-completion ntpdate chrony jq openvpn easy-rsa
     print_success "Packet Yang Dibutuhkan"
     
-function pasang_domain() {
-    clear
-
-    echo -e "\e[1;34m------------------------------------------------------------\e[0m"
-    echo -e "\e[1;36m         Selamat Datang di Pengaturan Domain              \e[0m"
-    echo -e "\e[1;34m------------------------------------------------------------\e[0m"
-
-    while true; do
-        echo -e "\e[1;32mPlease Select a Domain Type Below:\e[0m"
-        echo -e "\e[1;34m------------------------------------------------------------\e[0m"
-        echo -e "\e[1;32m1)\e[0m \e[1;37mMenggunakan Domain Sendiri\e[0m"
-        echo -e "\e[1;32m2)\e[0m \e[1;37mMenggunakan Domain Random\e[0m"
-        echo -e "\e[1;34m------------------------------------------------------------\e[0m"
-        read -p "   Please select numbers 1-2 or Any Button(Random): " host
-        echo ""
-
-        if [[ $host == "1" ]]; then
-            echo -e "   \e[1;32mPlease Enter Your Subdomain:\e[0m"
-            read -p "   Subdomain: " host1
-            
-            # Pastikan host1 tidak kosong
-            if [[ -z "$host1" ]]; then
-                echo -e "\e[1;31mSubdomain cannot be empty. Please try again.\e[0m"
-                echo ""
-                continue
-            fi
-            
-            echo "IP=" >> /var/lib/kyt/ipvps.conf
-            echo "$host1" > /etc/xray/domain
-            echo "$host1" > /root/domain
-            echo -e "\e[1;32mSubdomain '$host1' has been set successfully!\e[0m"
-            echo ""
-            break  # Keluar dari loop setelah sukses
-        elif [[ $host == "2" ]]; then
-            echo -e "\e[1;36mInstalling random domain...\e[0m"
-            # Install cf
-            wget ${REPO}files/cf && chmod +x cf && ./cf
-            rm -f /root/cf
-            echo -e "\e[1;32mRandom domain has been set successfully!\e[0m"
-            clear
-            break  # Keluar dari loop setelah sukses
-        else
-            echo -e "\e[1;31mInvalid selection. Please try again.\e[0m"
-            echo ""
-        fi
-    done
-    echo -e "\e[1;34m------------------------------------------------------------\e[0m"
-    echo -e "\e[1;36m                  Terima Kasih Telah Menggunakan           \e[0m"
-    echo -e "\e[1;36m                 Sistem Pengaturan Domain Kami              \e[0m"
-    echo -e "\e[1;34m------------------------------------------------------------\e[0m"
 }
 clear
+# Fungsi input domain
+function pasang_domain() {
+echo -e ""
+clear
+    echo -e "   .----------------------------------."
+echo -e "   |\e[1;32mPlease Select a Domain Type Below \e[0m|"
+echo -e "   '----------------------------------'"
+echo -e "     \e[1;32m1)\e[0m Menggunakan Domain Sendiri"
+echo -e "     \e[1;32m2)\e[0m Menggunakan Domain Random"
+echo -e "   ------------------------------------"
+read -p "   Please select numbers 1-2 or Any Button(Random) : " host
+echo ""
+if [[ $host == "1" ]]; then
+echo -e "   \e[1;32mPlease Enter Your Subdomain $NC"
+read -p "   Subdomain: " host1
+echo "IP=" >> /var/lib/kyt/ipvps.conf
+echo $host1 > /etc/xray/domain
+echo $host1 > /root/domain
+echo ""
+elif [[ $host == "2" ]]; then
+#install cf
+wget ${REPO}files/cf && chmod +x cf && ./cf
+rm -f /root/cf
+clear
+else
+print_install "Random Subdomain/Domain is Used"
+clear
+    fi
+}
+
+clear
+#GANTI PASSWORD DEFAULT
 restart_system(){
 #IZIN SCRIPT
 MYIP=$(curl -sS ipv4.icanhazip.com)
 echo -e "\e[32mloading...\e[0m" 
 clear
-izinsc="https://raw.githubusercontent.com/Lite-VPN/izin/main/ip"
+izinsc="https://raw.githubusercontent.com/vermiliion/izin/main/ip"
 rm -f /usr/bin/user
 username=$(curl $izinsc | grep $MYIP | awk '{print $2}')
 echo "$username" >/usr/bin/user
@@ -411,7 +393,7 @@ rm -rf /etc/vmess/.vmess.db
 #Instal Xray
 function install_xray() {
 clear
-    print_install "Core Xray Latest Version"
+    print_install "Core Xray 1.8.1 Latest Version"
     domainSock_dir="/run/xray";! [ -d $domainSock_dir ] && mkdir  $domainSock_dir
     chown www-data.www-data $domainSock_dir
     
@@ -425,12 +407,12 @@ bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release
     #chmod +x /usr/local/bin/xray
     domain=$(cat /etc/xray/domain)
     IPVS=$(cat /etc/xray/ipvps)
-    print_success "Core Xray Latest Version"
+    print_success "Core Xray 1.8.1 Latest Version"
     
     # Settings UP Nginix Server
     clear
-    curl -s ipinfo.io/city
-    curl -s ipinfo.io/org | cut -d " " -f 2-10
+    curl -s ipinfo.io/city >>/etc/xray/city
+    curl -s ipinfo.io/org | cut -d " " -f 2-10 >>/etc/xray/isp
     print_install "Memasang Konfigurasi Packet"
     wget -O /etc/haproxy/haproxy.cfg "${REPO}config/haproxy.cfg" >/dev/null 2>&1
     wget -O /etc/nginx/conf.d/xray.conf "${REPO}config/xray.conf" >/dev/null 2>&1
@@ -804,9 +786,6 @@ function menu(){
     print_install "Memasang Menu Packet"
     wget ${REPO}menu/menu.zip
     unzip menu.zip
-    sudo dos2unix /usr/local/sbin/menu-bot
-    sudo dos2unix /usr/local/sbin/menu-warp
-    sudo dos2unix /usr/local/sbin/menu-slowdns
     chmod +x menu/*
     mv menu/* /usr/local/sbin
     rm -rf menu
