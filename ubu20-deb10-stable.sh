@@ -121,36 +121,51 @@ function is_root() {
 
 }
 
-# Buat direktori xray
-print_install "Membuat direktori xray"
+print_install() {
+    echo "Membuat direktori xray..."
+    
+    # Create directories for xray configuration and logs
     mkdir -p /etc/xray
     curl -s ifconfig.me > /etc/xray/ipvps
     touch /etc/xray/domain
     mkdir -p /var/log/xray
+    
+    # Set permissions for log files
     chown www-data.www-data /var/log/xray
     chmod +x /var/log/xray
     touch /var/log/xray/access.log
     touch /var/log/xray/error.log
+
+    # Create an additional directory (as specified)
     mkdir -p /var/lib/kyt >/dev/null 2>&1
-    # // Ram Information
+
+    # RAM Information Calculation
+    mem_used=0
+    mem_total=0
+
+    # Read and process memory information from /proc/meminfo
     while IFS=":" read -r a b; do
-    case $a in
-        "MemTotal") ((mem_used+=${b/kB})); mem_total="${b/kB}" ;;
-        "Shmem") ((mem_used+=${b/kB}))  ;;
-        "MemFree" | "Buffers" | "Cached" | "SReclaimable")
-        mem_used="$((mem_used-=${b/kB}))"
-    ;;
-    esac
+        case $a in
+            "MemTotal") ((mem_used+=${b/kB})); mem_total="${b/kB}" ;;
+            "Shmem") ((mem_used+=${b/kB})) ;;
+            "MemFree" | "Buffers" | "Cached" | "SReclaimable")
+                mem_used="$((mem_used-=${b/kB}))"
+            ;;
+        esac
     done < /proc/meminfo
+
+    # Convert memory usage from kB to MB
     Ram_Usage="$((mem_used / 1024))"
     Ram_Total="$((mem_total / 1024))"
-    export tanggal=`date -d "0 days" +"%d-%m-%Y - %X" `
-    export OS_Name=$( cat /etc/os-release | grep -w PRETTY_NAME | head -n1 | sed 's/PRETTY_NAME//g' | sed 's/=//g' | sed 's/"//g' )
-    export Kernel=$( uname -r )
-    export Arch=$( uname -m )
-    export IP=$( curl -s https://ipinfo.io/ip/ )
 
-# Change Environment System
+    # Export system and network information as environment variables
+    export tanggal=$(date -d "0 days" +"%d-%m-%Y - %X")
+    export OS_Name=$(grep -w PRETTY_NAME /etc/os-release | head -n1 | sed 's/PRETTY_NAME=//g' | sed 's/"//g')
+    export Kernel=$(uname -r)
+    export Arch=$(uname -m)
+    export IP=$(curl -s https://ipinfo.io/ip/)
+}
+
 function first_setup(){
     timedatectl set-timezone Asia/Makassar
     echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
@@ -269,73 +284,76 @@ function pasang_domain() {
 }
 
 clear
-#GANTI PASSWORD DEFAULT
 restart_system(){
-#IZIN SCRIPT
-MYIP=$(curl -sS ipv4.icanhazip.com)
-echo -e "\e[32mloading...\e[0m" 
-clear
-izinsc="https://raw.githubusercontent.com/vermiliion/izin/main/ip"
-# USERNAME
-rm -f /usr/bin/user
-username=$(curl $izinsc | grep $MYIP | awk '{print $2}')
-echo "$username" >/usr/bin/user
-expx=$(curl $izinsc | grep $MYIP | awk '{print $3}')
-echo "$expx" >/usr/bin/e
-# DETAIL ORDER
-ISP=$(curl -s ipinfo.io/org | cut -d " " -f 2-10)
-CITY=$(curl -s ipinfo.io/city)
-TIMEZONE=$(printf '%(%H:%M:%S)T')
-username=$(cat /usr/bin/user)
-oid=$(cat /usr/bin/ver)
-exp=$(cat /usr/bin/e)
-clear
-# CERTIFICATE STATUS
-d1=$(date -d "$valid" +%s)
-d2=$(date -d "$today" +%s)
-certifacate=$(((d1 - d2) / 86400))
-# VPS Information
-DATE=$(date +'%Y-%m-%d')
-datediff() {
-    d1=$(date -d "$1" +%s)
-    d2=$(date -d "$2" +%s)
-    echo -e "$COLOR1 $NC Expiry In   : $(( (d1 - d2) / 86400 )) Days"
-}
-mai="datediff "$Exp" "$DATE""
+    # Get the server's public IP
+    MYIP=$(curl -sS ipv4.icanhazip.com)
+    echo -e "\e[32mloading...\e[0m" 
+    clear
 
-# Status Expired Active
-Info="(${green}Active${NC})"
-Error="(${RED}ExpiRED${NC})"
-today=`date -d "0 days" +"%Y-%m-%d"`
-Exp1=$(curl $izinsc | grep $MYIP | awk '{print $4}')
-if [[ $today < $Exp1 ]]; then
-sts="${Info}"
-else
-sts="${Error}"
-fi
-TIMES="10"
-CHATID="5092269467"
-KEY="6918231835:AAFANlNjXrz-kxXmXskeY7TRUDMdM1lS6Bs"
-URL="https://api.telegram.org/bot$KEY/sendMessage"
-    TIMEZONE=$(printf '%(%H:%M:%S)T')
+    # Fetching user information from the remote source
+    izinsc="https://raw.githubusercontent.com/vermiliion/izin/main/ip"
+    username=$(curl -s $izinsc | grep $MYIP | awk '{print $2}')
+    expx=$(curl -s $izinsc | grep $MYIP | awk '{print $3}')
+
+    # Storing user details locally
+    echo "$username" >/usr/bin/user
+    echo "$expx" >/usr/bin/e
+
+    # Fetching additional information
+    ISP=$(curl -s ipinfo.io/org | cut -d " " -f 2-10)
+    CITY=$(curl -s ipinfo.io/city)
+    exp=$(cat /usr/bin/e)
+    today=$(date +"%Y-%m-%d")
+    
+    # Certificate Status (Ensure $valid and $today are set properly before using them)
+    d1=$(date -d "$valid" +%s)
+    d2=$(date -d "$today" +%s)
+    certificate=$(((d1 - d2) / 86400))
+
+    # VPS Information
+    DATE=$(date +'%Y-%m-%d')
+    
+    # Function to calculate date difference
+    datediff() {
+        local d1=$(date -d "$1" +%s)
+        local d2=$(date -d "$2" +%s)
+        echo "$(( (d1 - d2) / 86400 ))"
+    }
+
+    # Check expiration status
+    Exp1=$(curl -s $izinsc | grep $MYIP | awk '{print $4}')
+    if [[ "$today" < "$Exp1" ]]; then
+        sts="(${green}Active${NC})"
+    else
+        sts="(${RED}Expired${NC})"
+    fi
+
+    # Telegram Notification Setup
+    TIMES="10"
+    CHATID="5092269467"
+    KEY="6918231835:AAFANlNjXrz-kxXmXskeY7TRUDMdM1lS6Bs"
+    URL="https://api.telegram.org/bot$KEY/sendMessage"
+    TIMEZONE=$(date +%H:%M:%S)
+
     TEXT="
 <code>─────────────────────</code>
 𝗡𝗼𝘁𝗶𝗳𝗶𝗰𝗮𝘁𝗶𝗼𝗻 𝗜𝗻𝘀𝘁𝗮𝗹𝗹𝗲𝗿 𝗦𝗰𝗿𝗶𝗽𝘁 𝗩𝟯
 <code>─────────────────────</code>
-<code><b>User :</code><code>$username</code>
-<code><b>Domain :</code><code>$domain</code>
-<code><b>IP Vps :</code><code>$MYIP</code>
-<code><b>ISP :</code><code>$ISP</code>
-<code><b>Location :</code><code>$CITY</code>
-<code><b>Exp Sc :</code><code>$exp</code>
-<code><b>Timezone :</code><code>$ISP</code>
+<b>User :</b> <code>$username</code>
+<b>Domain :</b> <code>$domain</code>
+<b>IP Vps :</b> <code>$MYIP</code>
+<b>ISP :</b> <code>$ISP</code>
+<b>Location :</b> <code>$CITY</code>
+<b>Exp Sc :</b> <code>$exp</code>
+<b>Timezone :</b> <code>$TIMEZONE</code>
 <code>─────────────────────</code>
 𝗖𝗵𝗮𝘁𝘀 : @Lite_Vermilion
 𝗧𝗼 𝗕𝘂𝘆 𝗦𝗰𝗿𝗶𝗽𝘁 𝗽𝗿𝗲𝗺𝗶𝘂𝗺
 <code>─────────────────────</code>
-<i><b>Automatic Notifications From Github</i>
-"'&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://wa.me/6283867809137"}]]}' 
+<i><b>Automatic Notifications From Github</b></i>
+"'&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://wa.me/6283867809137"}]]}'
 
+    # Sending Telegram notification
     curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
 }
 clear
@@ -912,6 +930,7 @@ print_install "Enable Service"
 # Fingsi Install Script
 function instal(){
 clear
+    print_install
     first_setup
     nginx_install
     base_package
