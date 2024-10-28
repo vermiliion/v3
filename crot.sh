@@ -311,13 +311,13 @@ URL="https://api.telegram.org/bot$KEY/sendMessage"
 <code>────────────────────</code>
 <b>🍀Notification Autoscript V3🍀</b>
 <code>────────────────────</code>
-echo -e "<code>User      :</code> <code>$username</code>"
-echo -e "<code>Domain    :</code> <code>$domain</code>"
-echo -e "<code>IP VPS    :</code> <code>$MYIP</code>"
-echo -e "<code>ISP       :</code> <code>$ISP</code>"
-echo -e "<code>Location   :</code> <code>$CITY</code>"
-echo -e "<code>Timezone   :</code> <code>$TIMEZONE</code>"
-echo -e "<code>Expired    :</code> <code>$exp</code>"
+<code>User      :</code> <code>$username</code>
+<code>Domain    :</code> <code>$domain</code>
+<code>IP VPS    :</code> <code>$MYIP</code>
+<code>ISP       :</code> <code>$ISP</code>
+<code>Location   :</code> <code>$CITY</code>
+<code>Timezone   :</code> <code>$TIMEZONE</code>
+<code>Expired    :</code> <code>$exp</code>
 <code>────────────────────</code>
 <b>Chats My Telegram To Order</b>
 @LITE_VERMILION
