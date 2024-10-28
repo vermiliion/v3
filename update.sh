@@ -33,17 +33,19 @@ res1() {
     wget https://raw.githubusercontent.com/vermiliion/v3/main/menu/menu.zip
     unzip menu.zip
     chmod +x menu/*
-    mv menu/* /usr/local/sbin
+    mv menu/* /usr/bin
     rm -rf menu
     rm -rf menu.zip
     rm -rf update.sh
-    cd /usr/local/sbin
+    cd /usr/bin
     sed -i 's/\r$//' /menu-bot
     sed -i 's/\r$//' /menu-warp
     sed -i 's/\r$//' /menu-slowdns
+    sed -i 's/\r$//' /autobackup
     chmod +x menu-bot
     chmod +x menu-warp
     chmod +x menu-slowdns
+    chmod +x autobackup
 }
 netfilter-persistent
 clear
