@@ -37,16 +37,16 @@ res1() {
     rm -rf menu
     rm -rf menu.zip
     rm -rf update.sh
+    cd /usr/local/sbin
+    sed -i 's/\r$//' /menu-bot
+    sed -i 's/\r$//' /menu-warp
+    sed -i 's/\r$//' /menu-slowdns
+    chmod +x menu-bot
+    chmod +x menu-warp
+    chmod +x menu-slowdns
 }
 netfilter-persistent
 clear
-cd /usr/local/sbin
-sed -i 's/\r$//' /usr/local/sbin/menu-bot
-sed -i 's/\r$//' /usr/local/sbin/menu-warp
-sed -i 's/\r$//' /usr/local/sbin/menu-slowdns
-chmod +x /usr/local/sbin/menu-bot
-chmod +x /usr/local/sbin/menu-warp
-chmod +x /usr/local/sbin/menu-slowdns
 echo -e "\033[97m◇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━◇\033[0m"
 echo -e " \033[1;97;41m             MENGUPDATE SCRIPT           \033[0m"
 echo -e "\033[97m◇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━◇\033[0m"
