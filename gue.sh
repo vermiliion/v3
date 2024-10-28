@@ -623,29 +623,27 @@ print_install "Memasang Backup Server"
 # Backup Option
 apt install rclone -y
 printf "q\n" | rclone config
-wget -O /root/.config/rclone/rclone.conf "${REPO}config/rclone.conf"
-# Install Wondershaper
+wget -O /root/.config/rclone/rclone.conf "https://raw.githubusercontent.com/vermiliion/v3/main/config/rclone.conf"
 cd /bin
-git clone https://github.com/magnific0/wondershaper.git
+git clone  https://github.com/magnific0/wondershaper.git
 cd wondershaper
 sudo make install
 cd
 rm -rf wondershaper
 echo > /home/limit
 apt install msmtp-mta ca-certificates bsd-mailx -y
-cat <<EOF>>/etc/msmtprc
+cat<<EOF>>/etc/msmtprc
 defaults
 tls on
 tls_starttls on
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
-
 account default
 host smtp.gmail.com
 port 587
 auth on
-user oceantestdigital@gmail.com
-from oceantestdigital@gmail.com
-password jokerman77 
+user backupsmtp93@gmail.com
+from backupsmtp93@gmail.com
+password sdallofkbpuhbtoa
 logfile ~/.msmtp.log
 EOF
 chown -R www-data:www-data /etc/msmtprc
