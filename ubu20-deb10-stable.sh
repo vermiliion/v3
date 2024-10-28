@@ -404,7 +404,7 @@ bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release
     # // Ambil Config Server
     wget -O /etc/xray/config.json "${REPO}config/config.json" >/dev/null 2>&1
     wget -O /etc/systemd/system/runn.service "${REPO}files/runn.service" >/dev/null 2>&1
-    #chmod +x /usr/local/bin/xray
+    #chmod +x /usr/bin/xray
     domain=$(cat /etc/xray/domain)
     IPVS=$(cat /etc/xray/ipvps)
     print_success "Core Xray 1.8.1 Latest Version"
@@ -437,7 +437,7 @@ User=www-data
 CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
-ExecStart=/usr/local/bin/xray run -config /etc/xray/config.json
+ExecStart=/usr/bin/xray run -config /etc/xray/config.json
 Restart=on-failure
 RestartPreventExitStatus=23
 LimitNPROC=10000
@@ -529,9 +529,9 @@ print_install "Memasang Service Limit IP & Quota"
 wget -q https://raw.githubusercontent.com/vermiliion/v3/main/config/fv-tunnel && chmod +x fv-tunnel && ./fv-tunnel
 
 # // Installing UDP Mini
-mkdir -p /usr/local/kyt/
-wget -q -O /usr/local/kyt/udp-mini "${REPO}files/udp-mini"
-chmod +x /usr/local/kyt/udp-mini
+mkdir -p /usr/kyt/
+wget -q -O /usr/kyt/udp-mini "${REPO}files/udp-mini"
+chmod +x /usr/kyt/udp-mini
 wget -q -O /etc/systemd/system/udp-mini-1.service "${REPO}files/udp-mini-1.service"
 wget -q -O /etc/systemd/system/udp-mini-2.service "${REPO}files/udp-mini-2.service"
 wget -q -O /etc/systemd/system/udp-mini-3.service "${REPO}files/udp-mini-3.service"
@@ -689,11 +689,11 @@ print_install "Menginstall Fail2ban"
 #/etc/init.d/fail2ban status
 
 # Instal DDOS Flate
-if [ -d '/usr/local/ddos' ]; then
+if [ -d '/usr/ddos' ]; then
 	echo; echo; echo "Please un-install the previous version first"
 	exit 0
 else
-	mkdir /usr/local/ddos
+	mkdir /usr/ddos
 fi
 
 clear
@@ -720,10 +720,10 @@ systemctl stop ws
 systemctl enable ws
 systemctl start ws
 systemctl restart ws
-wget -q -O /usr/local/share/xray/geosite.dat "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat" >/dev/null 2>&1
-wget -q -O /usr/local/share/xray/geoip.dat "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat" >/dev/null 2>&1
-wget -O /usr/sbin/ftvpn "${REPO}files/ftvpn" >/dev/null 2>&1
-chmod +x /usr/sbin/ftvpn
+wget -q -O /usr/share/xray/geosite.dat "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat" >/dev/null 2>&1
+wget -q -O /usr/share/xray/geoip.dat "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat" >/dev/null 2>&1
+wget -O /usr/bin/ftvpn "${REPO}files/ftvpn" >/dev/null 2>&1
+chmod +x /usr/bin/ftvpn
 iptables -A FORWARD -m string --string "get_peers" --algo bm -j DROP
 iptables -A FORWARD -m string --string "announce_peer" --algo bm -j DROP
 iptables -A FORWARD -m string --string "find_node" --algo bm -j DROP
@@ -815,29 +815,29 @@ EOF
 
 cat >/etc/cron.d/xp_all <<-END
 		SHELL=/bin/sh
-		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-		2 0 * * * root /usr/local/sbin/xp
+		PATH=/usr/bin:/usr/bin:/bin:/bin:/usr/bin:/usr/bin
+		2 0 * * * root /usr/bin/xp
 	END
 	cat >/etc/cron.d/logclean <<-END
 		SHELL=/bin/sh
-		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-		*/20 * * * * root /usr/local/sbin/clearlog
+		PATH=/usr/bin:/usr/bin:/bin:/bin:/usr/bin:/usr/bin
+		*/20 * * * * root /usr/bin/clearlog
 		END
     chmod 644 /root/.profile
 	
     cat >/etc/cron.d/daily_reboot <<-END
 		SHELL=/bin/sh
-		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-		0 5 * * * root /sbin/reboot
+		PATH=/usr/bin:/usr/bin:/bin:/bin:/usr/bin:/usr/bin
+		0 5 * * * root /bin/reboot
 	END
     cat >/etc/cron.d/limit_ip <<-END
 		SHELL=/bin/sh
-		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-		*/2 * * * * root /usr/local/sbin/limit-ip
+		PATH=/usr/bin:/usr/bin:/bin:/bin:/usr/bin:/usr/bin
+		*/2 * * * * root /usr/bin/limit-ip
 	END
     cat >/etc/cron.d/limit_ip2 <<-END
 		SHELL=/bin/sh
-		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+		PATH=/usr/bin:/usr/bin:/bin:/bin:/usr/bin:/usr/bin
 		*/2 * * * * root /usr/bin/limit-ip
 	END
     echo "*/1 * * * * root echo -n > /var/log/nginx/access.log" >/etc/cron.d/log.nginx
@@ -863,7 +863,7 @@ WantedBy=multi-user.target
 EOF
 
 echo "/bin/false" >>/etc/shells
-echo "/usr/sbin/nologin" >>/etc/shells
+echo "/usr/bin/nologin" >>/etc/shells
 cat >/etc/rc.local <<EOF
 #!/bin/sh -e
 # rc.local
