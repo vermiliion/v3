@@ -275,77 +275,72 @@ function pasang_domain() {
     echo -e "\e[1;36m                 Sistem Pengaturan Domain Kami              \e[0m"
     echo -e "\e[1;34m------------------------------------------------------------\e[0m"
 }
-
 clear
-restart_system() {
-    # IZIN SCRIPT
-    MYIP=$(curl -sS ipv4.icanhazip.com)
-    echo -e "\e[32mLoading...\e[0m" 
-    clear
-    izinsc="https://raw.githubusercontent.com/vermiliion/izin/main/ip"
+restart_system(){
+#IZIN SCRIPT
+MYIP=$(curl -sS ipv4.icanhazip.com)
+echo -e "\e[32mloading...\e[0m" 
+clear
+izinsc="https://raw.githubusercontent.com/Lite-VPN/izin/main/ip"
+rm -f /usr/bin/user
+username=$(curl $izinsc | grep $MYIP | awk '{print $2}')
+echo "$username" >/usr/bin/user
+expx=$(curl $izinsc | grep $MYIP | awk '{print $3}')
+echo "$expx" >/usr/bin/e
+username=$(cat /usr/bin/user)
+oid=$(cat /usr/bin/ver)
+exp=$(cat /usr/bin/e)
+clear
+# CERTIFICATE STATUS
+d1=$(date -d "$valid" +%s)
+d2=$(date -d "$today" +%s)
+certifacate=$(((d1 - d2) / 86400))
+# VPS Information
+DATE=$(date +'%Y-%m-%d')
+datediff() {
+    d1=$(date -d "$1" +%s)
+    d2=$(date -d "$2" +%s)
+    echo -e "$COLOR1 $NC Expiry In   : $(( (d1 - d2) / 86400 )) Days"
+}
+mai="datediff "$Exp" "$DATE""
 
-    # USERNAME
-    rm -f /usr/bin/user
-    username=$(curl -s $izinsc | grep $MYIP | awk '{print $2}')
-    echo "$username" >/usr/bin/user
-
-    expx=$(curl -s $izinsc | grep $MYIP | awk '{print $3}')
-    echo "$expx" >/usr/bin/e
-
-    # DETAIL ORDER
-    username=$(cat /usr/bin/user)
-    oid=$(cat /usr/bin/ver)
-    exp=$(cat /usr/bin/e)
-    clear
-
-    # CERTIFICATE STATUS
-    today=$(date -d "0 days" +"%Y-%m-%d")
-    Exp1=$(curl -s $izinsc | grep $MYIP | awk '{print $4}')
-
-    # Status Expired Active
-    Info="(${green}Active${NC})"
-    Error="(${RED}Expired${NC})"
-
-    if [[ $today < $Exp1 ]]; then
-        sts="${Info}"
-    else
-        sts="${Error}"
-    fi
-
-    # Mendapatkan informasi ISP dan Location
-    ISP=$(curl -s https://ipinfo.io/$MYIP/org)
-    location=$(curl -s https://ipinfo.io/$MYIP | jq -r .city), $(curl -s https://ipinfo.io/$MYIP | jq -r .region)
-
-    # Mendapatkan Timezone
-    timezone=$(curl -s http://worldtimeapi.org/api/ip/$MYIP | jq -r .timezone)
-
-    TIMES="10"
-    CHATID="5092269467"
-    KEY="6918231835:AAFANlNjXrz-kxXmXskeY7TRUDMdM1lS6Bs"  # Replace with your actual Telegram bot API key
-    URL="https://api.telegram.org/bot$KEY/sendMessage" 
+# Status Expired Active
+Info="(${green}Active${NC})"
+Error="(${RED}ExpiRED${NC})"
+today=`date -d "0 days" +"%Y-%m-%d"`
+Exp1=$(curl $izinsc | grep $MYIP | awk '{print $4}')
+if [[ $today < $Exp1 ]]; then
+sts="${Info}"
+else
+sts="${Error}"
+fi
+TIMES="10"
+CHATID="5092269467"
+KEY="6918231835:AAFANlNjXrz-kxXmXskeY7TRUDMdM1lS6Bs"
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+    TIMEZONE=$(printf '%(%H:%M:%S)T')
+    CITY=$(curl -s ipinfo.io/city)
+    ISP=$(curl -s ipinfo.io/org | cut -d " " -f 2-10)
     TEXT="
-<code>══════════════════════</code>
-<b>🔸Notification AutoScript V3🔸</b>
-<code>══════════════════════</code>
-<code>👤 User     :</code> <code><b>$username</b></code>
-<code>🌐 Domain   :</code> <code><b>$domain</b></code>
-<code>💻 IP VPS   :</code> <code><b>$MYIP</b></code>
-<code>📡 ISP      :</code> <code><b>$ISP</b></code>
-<code>📍 Location  :</code> <code><b>$location</b></code>
-<code>🕒 Timezone  :</code> <code><b>$timezone</b></code>
-<code>🗓 Expiry   :</code> <code><b>$exp</b></code>
-<code>══════════════════════</code>
-<b>🔸Buy Premium VPN & SCRIPT🔸</b>
-<code>══════════════════════</code>
-Chats: @LITE_VERMILION
-<code>══════════════════════</code>
+<code>────────────────────</code>
+<b>🍀Notification Autoscript V3🍀</b>
+<code>────────────────────</code>
+<code>User     :</code><code>$username</code>
+<code>Domain   :</code><code>$domain</code>
+<code>IP Vps   :</code><code>$MYIP</code>
+<code>ISP      :</code><code>$ISP</code>
+<code>Location    :</code><code>$CITY</code>
+<code>Timezone :</code><code>$TIMEZONE</code>
+<code>Expaired  :</code><code>$exp</code>
+<code>────────────────────</code>
+<b>Chats My Telegram To Order</b>
+@LITE_VERMILION
+<code>────────────────────</code>
 <i>Automatic Notifications From Github</i>
-"
+"'&reply_markup={"inline_keyboard":[[{"text":"ᴏʀᴅᴇʀ","url":"https://wa.me/6283867809137"}]]}' 
 
     curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
 }
-
-
 clear
 # Pasang SSL
 function pasang_ssl() {
