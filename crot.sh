@@ -131,7 +131,7 @@ print_install "Membuat direktori xray"
     chmod +x /var/log/xray
     touch /var/log/xray/access.log
     touch /var/log/xray/error.log
-    mkdir -p /var/lib/kyt >/dev/null 2>&1
+    mkdir -p /var/lib >/dev/null 2>&1
     # // Ram Information
     while IFS=":" read -r a b; do
     case $a in
@@ -232,33 +232,41 @@ function base_package() {
 clear
 # Fungsi input domain
 function pasang_domain() {
-echo -e ""
-clear
-    echo -e "   .----------------------------------."
-echo -e "   |\e[1;32mPlease Select a Domain Type Below \e[0m|"
-echo -e "   '----------------------------------'"
-echo -e "     \e[1;32m1)\e[0m Menggunakan Domain Sendiri"
-echo -e "     \e[1;32m2)\e[0m Menggunakan Domain Random"
-echo -e "   ------------------------------------"
-read -p "   Please select numbers 1-2 or Any Button(Random) : " host
-echo ""
-if [[ $host == "1" ]]; then
-echo -e "   \e[1;32mPlease Enter Your Subdomain $NC"
-read -p "   Subdomain: " host1
-echo "IP=" >> /var/lib/kyt/ipvps.conf
-echo $host1 > /etc/xray/domain
-echo $host1 > /root/domain
-echo ""
-elif [[ $host == "2" ]]; then
-#install cf
-wget -q ${REPO}files/cf && chmod +x cf && ./cf
-rm -f /root/cf
-clear
-else
-print_install "Random Subdomain/Domain is Used"
-clear
-    fi
+    clear
+    while true; do
+        echo -e "\e[1;33m-------------------------------------------------\e[0m"
+        echo -e "   \e[1;34m     Please Select a Domain Type Below\e[0m"
+        echo -e "\e[1;33m-------------------------------------------------\e[0m"
+        echo -e "     \e[1;32m1)\e[0m Menggunakan Domain Sendiri"
+        echo -e "     \e[1;32m2)\e[0m Menggunakan Domain Random"
+        echo -e "\e[1;33m-------------------------------------------------\e[0m"
+        
+        read -p " Please select numbers 1-2: " host
+        echo ""
+        
+        if [[ $host == "1" ]]; then
+            echo -e "Please Enter Your Subdomain:"
+            read -p "   Subdomain: " host1
+            echo "IP=" >> /var/lib/ipvps.conf
+            echo $host1 > /etc/xray/domain
+            echo $host1 > /root/domain
+            echo -e "\e[1;32m   Subdomain successfully set to: $host1\e[0m"
+            echo ""
+            break
+        elif [[ $host == "2" ]]; then
+            echo -e "\e[1;36m   Installing random subdomain...\e[0m"
+            wget -q ${REPO}files/cf && chmod +x cf && ./cf
+            rm -f /root/cf
+            clear
+            echo -e "\e[1;32m   Random subdomain successfully set!\e[0m"
+            break
+        else
+            echo -e "\e[1;31m   Invalid choice! Please select either 1 or 2.\e[0m"
+            echo -e "\e[1;33m-------------------------------------------------\e[0m"
+        fi
+    done
 }
+
 
 clear
 #GANTI PASSWORD DEFAULT
@@ -368,10 +376,10 @@ rm -rf /etc/vmess/.vmess.db
     mkdir -p /usr/bin/xray/
     mkdir -p /var/log/xray/
     mkdir -p /var/www/html
-    mkdir -p /etc/kyt/limit/vmess/ip
-    mkdir -p /etc/kyt/limit/vless/ip
-    mkdir -p /etc/kyt/limit/trojan/ip
-    mkdir -p /etc/kyt/limit/ssh/ip
+    mkdir -p /etc/limit/vmess/ip
+    mkdir -p /etc/limit/vless/ip
+    mkdir -p /etc/limit/trojan/ip
+    mkdir -p /etc/limit/ssh/ip
     mkdir -p /etc/limit/vmess
     mkdir -p /etc/limit/vless
     mkdir -p /etc/limit/trojan
@@ -533,9 +541,9 @@ print_install "Memasang Service Limit IP & Quota"
 wget -q https://raw.githubusercontent.com/vermiliion/v3/main/config/fv-tunnel && chmod +x fv-tunnel && ./fv-tunnel
 
 # // Installing UDP Mini
-mkdir -p /usr/local/kyt/
-wget -q -O /usr/local/kyt/udp-mini "${REPO}files/udp-mini"
-chmod +x /usr/local/kyt/udp-mini
+mkdir -p /usr/local/
+wget -q -O /usr/local/udp-mini "${REPO}files/udp-mini"
+chmod +x /usr/local/udp-mini
 wget -q -O /etc/systemd/system/udp-mini-1.service "${REPO}files/udp-mini-1.service"
 wget -q -O /etc/systemd/system/udp-mini-2.service "${REPO}files/udp-mini-2.service"
 wget -q -O /etc/systemd/system/udp-mini-3.service "${REPO}files/udp-mini-3.service"
@@ -585,6 +593,7 @@ chmod +x /etc/default/dropbear
 systemctl restart dropbear
 print_success "Dropbear"
 }
+
 
 clear
 function ins_vnstat(){
@@ -694,11 +703,11 @@ else
 fi
 
 # Update SSHD and Dropbear banners
-echo "Banner /etc/kyt.txt" >>/etc/ssh/sshd_config
-sed -i 's@DROPBEAR_BANNER=""@DROPBEAR_BANNER="/etc/kyt.txt"@g' /etc/default/dropbear
+echo "Banner /etc/banner-ssh.txt" >>/etc/ssh/sshd_config
+sed -i 's@DROPBEAR_BANNER=""@DROPBEAR_BANNER="/etc/banner-ssh.txt"@g' /etc/default/dropbear
 
 # Set new banner
-wget -O /etc/kyt.txt "${REPO}files/issue.net"
+wget -O /etc/banner-ssh.txt "${REPO}files/issue.net"
 print_success "Fail2ban"
 }
 
