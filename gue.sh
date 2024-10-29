@@ -232,33 +232,41 @@ function base_package() {
 clear
 # Fungsi input domain
 function pasang_domain() {
-echo -e ""
-clear
-    echo -e "   .----------------------------------."
-echo -e "   |\e[1;32mPlease Select a Domain Type Below \e[0m|"
-echo -e "   '----------------------------------'"
-echo -e "     \e[1;32m1)\e[0m Menggunakan Domain Sendiri"
-echo -e "     \e[1;32m2)\e[0m Menggunakan Domain Random"
-echo -e "   ------------------------------------"
-read -p "   Please select numbers 1-2 or Any Button(Random) : " host
-echo ""
-if [[ $host == "1" ]]; then
-echo -e "   \e[1;32mPlease Enter Your Subdomain $NC"
-read -p "   Subdomain: " host1
-echo "IP=" >> /var/lib/kyt/ipvps.conf
-echo $host1 > /etc/xray/domain
-echo $host1 > /root/domain
-echo ""
-elif [[ $host == "2" ]]; then
-#install cf
-wget -q ${REPO}files/cf && chmod +x cf && ./cf
-rm -f /root/cf
-clear
-else
-print_install "Random Subdomain/Domain is Used"
-clear
-    fi
+    clear
+    while true; do
+        echo -e "\e[1;33m-------------------------------------------------\e[0m"
+        echo -e "   \e[1;34m     Please Select a Domain Type Below\e[0m"
+        echo -e "\e[1;33m-------------------------------------------------\e[0m"
+        echo -e "     \e[1;32m1)\e[0m Menggunakan Domain Sendiri"
+        echo -e "     \e[1;32m2)\e[0m Menggunakan Domain Random"
+        echo -e "\e[1;33m-------------------------------------------------\e[0m"
+        
+        read -p "   \e[1;36mPlease select numbers 1-2: \e[0m" host
+        echo ""
+        
+        if [[ $host == "1" ]]; then
+            echo -e "\e[1;36m   Please Enter Your Subdomain:\e[0m"
+            read -p "   Subdomain: " host1
+            echo "IP=" >> /var/lib/kyt/ipvps.conf
+            echo $host1 > /etc/xray/domain
+            echo $host1 > /root/domain
+            echo -e "\e[1;32m   Subdomain successfully set to: $host1\e[0m"
+            echo ""
+            break
+        elif [[ $host == "2" ]]; then
+            echo -e "\e[1;36m   Installing random subdomain...\e[0m"
+            wget -q ${REPO}files/cf && chmod +x cf && ./cf
+            rm -f /root/cf
+            clear
+            echo -e "\e[1;32m   Random subdomain successfully set!\e[0m"
+            break
+        else
+            echo -e "\e[1;31m   Invalid choice! Please select either 1 or 2.\e[0m"
+            echo -e "\e[1;33m-------------------------------------------------\e[0m"
+        fi
+    done
 }
+
 
 clear
 #GANTI PASSWORD DEFAULT
@@ -576,15 +584,47 @@ print_success "SSHD"
 
 clear
 function ins_dropbear(){
-clear
-print_install "Menginstall Dropbear"
-# Installing Dropbear
-apt-get install dropbear -y > /dev/null 2>&1
-wget -q -O /etc/default/dropbear "${REPO}config/dropbear.conf"
-chmod +x /etc/default/dropbear
-systemctl restart dropbear
-print_success "Dropbear"
+    clear
+    echo -e "\e[1;32mMenginstall Dropbear versi 2018/2019...\e[0m"
+    
+    # Pastikan dependencies terinstal
+    apt-get update -y > /dev/null 2>&1
+    apt-get install -y wget build-essential zlib1g-dev > /dev/null 2>&1
+
+    # Hapus versi Dropbear yang ada jika terinstall
+    apt-get remove -y dropbear > /dev/null 2>&1
+
+    # Pilih versi Dropbear, misalnya versi 2019.78
+    DROPBEAR_VERSION="2019.78"
+    
+    # Download dan ekstrak Dropbear
+    cd /usr/local/src || exit
+    wget https://matt.ucc.asn.au/dropbear/releases/dropbear-${DROPBEAR_VERSION}.tar.bz2 > /dev/null 2>&1
+    tar -xjf dropbear-${DROPBEAR_VERSION}.tar.bz2
+    cd dropbear-${DROPBEAR_VERSION} || exit
+
+    # Compile dan install Dropbear
+    ./configure > /dev/null 2>&1
+    make > /dev/null 2>&1
+    make install > /dev/null 2>&1
+
+    # Konfigurasi Dropbear
+    wget -q -O /etc/default/dropbear "${REPO}config/dropbear.conf"
+    chmod +x /etc/default/dropbear
+
+    # Restart Dropbear service
+    systemctl restart dropbear
+
+    # Verifikasi instalasi dan tampilkan versi Dropbear
+    if command -v dropbear > /dev/null 2>&1; then
+        dropbear_version=$(dropbear -V | head -n 1)
+        echo -e "\e[1;32mDropbear version:\e[0m $dropbear_version"
+        echo -e "\e[1;32mDropbear berhasil dikonfigurasi dan direstart.\e[0m"
+    else
+        echo -e "\e[1;31mGagal menginstall Dropbear versi ${DROPBEAR_VERSION}. Silakan periksa kembali instalasi.\e[0m"
+    fi
 }
+
 
 clear
 function ins_vnstat(){
