@@ -29,8 +29,8 @@ for user in "${data[@]}"; do
 
     # Check if IP limit file exists, otherwise set a default message
     iplimit="No limit"  # Default value if file doesn't exist or is empty
-    if [[ -f "/etc/kyt/limit/vmess/ip/${user}" ]]; then
-        iplimit=$(<"/etc/kyt/limit/vmess/ip/${user}")
+    if [[ -f "/etc/limit/vmess/ip/${user}" ]]; then
+        iplimit=$(<"/etc/limit/vmess/ip/${user}")
         
         # Handle case where file is empty
         if [[ -z "$iplimit" ]]; then

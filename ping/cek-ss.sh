@@ -42,7 +42,7 @@ for user in "${data[@]}"; do
         [[ -z "$lastlogin" ]] && lastlogin=$(grep -w "$user" /var/log/xray/access.log | tail -n 1 | awk '{print $2}')
 
         # Baca batas IP pengguna, fallback jika file tidak ada atau kosong
-        iplimit=$(<"/etc/kyt/limit/shadowsocks/ip/${user}" 2>/dev/null || echo "No limit")
+        iplimit=$(<"/etc/limit/shadowsocks/ip/${user}" 2>/dev/null || echo "No limit")
 
         # Hitung jumlah IP login
         jum2=$(wc -l < /tmp/ipshadowsocks.txt)
