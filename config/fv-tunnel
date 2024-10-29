@@ -29,9 +29,11 @@ systemctl enable --now limitshadowsocks
 
 cd
 wget -q -O /usr/bin/limit-ip "${REPO}files/limit-ip"
+wget -q -O /usr/bin/limit-ip "${REPO}files/xraylimit"
 chmod +x /usr/bin/*
 cd /usr/bin
 sed -i 's/\r//' limit-ip
+sed -i 's/\r//' xraylimit
 cd
 clear
 # // SERVICE LIMIT IP VMESS
