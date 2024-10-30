@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Set TERM environment variable
+export TERM=xterm
+
 # Fungsi untuk mengonversi byte menjadi format yang lebih mudah dibaca
 function con() {
     local -i bytes=$1
