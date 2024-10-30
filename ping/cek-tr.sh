@@ -56,7 +56,12 @@ for user in "${data[@]}"; do
         lim=$(con "$byte")
 
         # Baca kuota pengguna atau tetapkan 0 jika file tidak ada
-        wey=$(<"/etc/limit/trojan/${user}" 2>/dev/null || echo 0)
+        if [ -f "/etc/limit/trojan/${user}" ]; then
+            wey=$(<"/etc/limit/trojan/${user}")
+        else
+            wey=0
+        fi
+
         gb=$(con "$wey")
 
         # Tampilkan informasi akun
