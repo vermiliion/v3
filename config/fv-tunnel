@@ -29,7 +29,7 @@ systemctl enable --now limitshadowsocks
 
 cd
 wget -q -O /usr/bin/limit-ip "${REPO}files/limit-ip"
-wget -q -O /usr/bin/limit-ip "${REPO}files/xraylimit"
+wget -q -O /usr/bin/xraylimit "${REPO}files/xraylimit"
 chmod +x /usr/bin/*
 cd /usr/bin
 sed -i 's/\r//' limit-ip
