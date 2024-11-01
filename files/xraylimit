@@ -1,11 +1,11 @@
 #!/usr/bin/bash
-/usr/local/bin/multi_login_check.sh
+/usr/local/bin/xraylimit
 
-chmod +x /usr/local/bin/multi_login_check.sh
+chmod +x /usr/local/bin/xraylimit
 
 crontab -e
 
-*/1 * * * * /usr/local/bin/multi_login_check.sh
+*/1 * * * * /usr/local/bin/xraylimit
 
 dateFromServer=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
 biji=`date +"%Y-%m-%d" -d "$dateFromServer"`
